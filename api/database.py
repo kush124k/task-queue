@@ -13,10 +13,24 @@ class Base(DeclarativeBase):
 class Job(Base):
     __tablename__ = "jobs"
 
-    id: Mapped[str] = mapped_column(String,primary_key=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True)
     status: Mapped[str] = mapped_column(String)
+    worker_id: Mapped[str] = mapped_column(String, nullable=True)
     task: Mapped[str] =  mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(DateTime)
+    retries: Mapped[int] = mapped_column(default=0)
+
+class DeadJob(Base):
+    __tablename__ = "deadjobs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    status: Mapped[str] = mapped_column(String)
+    worker_id: Mapped[str] = mapped_column(String, nullable=True)
+    task: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+    retries: Mapped[int] = mapped_column(default=0)
+    failure_reason: Mapped[str] = mapped_column(String)
+    
 
 def create_table():
     Base.metadata.create_all(engine)

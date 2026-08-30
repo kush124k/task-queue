@@ -20,7 +20,7 @@ except redis.exceptions.ResponseError:
 def rjob(task):
     job_id =str(uuid.uuid4())
     with Session(engine) as session:
-        new_job = Job(id=job_id, status="pending", task = task, created_at=datetime.now)
+        new_job = Job(id=job_id, status="pending", task = task, created_at=datetime.now())
         session.add(new_job)
         session.commit()
     r.xadd(STREAM_NAME , {"job_id" : job_id})

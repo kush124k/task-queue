@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from api.routes.jobs import rjob, jobs_db
-from worker.worker import start_worker
+from api.routes.jobs import rjob, jobs_db, r
 from fastapi import FastAPI, HTTPException
-from api.database import engine, Job
+from api.database import engine, Job as JobModel, DeadJob, create_table
 from sqlalchemy.orm import Session
 
 app = FastAPI()
@@ -18,7 +17,6 @@ async def read_item(item_id: str):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    start_worker()
     yield
     print("shutting down")
 
@@ -43,10 +41,24 @@ async def postjob(job : Job):
 @app.get("/jobs/{job_id}")
 async def get_job(job_id: str):
     with  Session(engine) as session:
-        job = session.get(Job, job_id)
+        job = session.get(JobModel, job_id)
         if job is None:
             raise HTTPException(status_code=404, detail = "job not found")
         return {"id": job.id, "status": job.status, "task": job.task, "Created at": job.created_at}
+
+@app.post("/admin/reset")
+async def reset_all():
+    create_table()
+    
+    with Session(engine) as session:
+        session.query(JobModel).delete()
+        session.query(DeadJob).delete()
+        session.commit()
+
+    r.delete("job_stream")
+
+    return {"message": "all jobs and stream data cleared"}
+
     
 
 if __name__ == "__main__":
