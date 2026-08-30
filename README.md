@@ -1,38 +1,40 @@
-# Task Queue (Work in Progress)
+# Task Queue Learning Log 🚀
 
-**Note:** This is a personal Work in Progress (WIP) project. Features, architecture, and setup instructions are subject to change.
+*A personal scratchpad and developer diary for learning how to build a background task queue with FastAPI, Redis, and SQLAlchemy.*
 
-## Overview
-A lightweight, asynchronous task queue system built with FastAPI, Redis, and SQLAlchemy. It is designed to demonstrate decoupling background job processing from the main API web server.
+---
 
-## Current Architecture
-- **API Server:** Built with FastAPI, handling job creation and status retrieval.
-- **Message Broker:** Redis Streams to pass messages from the API to the worker.
-- **Worker:** A background Python worker thread that consumes jobs from the Redis Stream, processes them, and updates their status in the database.
-- **Database:** PostgreSQL (via SQLAlchemy) to persist job metadata and state (e.g., pending, running, success).
-- **Package Management:** `uv` is used for managing dependencies and the Python environment.
+## 🎯 Current Focus
+Trying to successfully decouple background job processing from the main web server. Right now, I've got the basic API up, and I'm messing around with Redis Streams to get a worker thread to pick up the jobs.
 
-## Current Status & WIP
-- [x] API endpoint to submit a job (`POST /postjob`)
-- [x] API endpoint to check job status (`GET /jobs/{job_id}`)
-- [x] Redis stream integration for reliable queueing
-- [x] Basic worker consuming tasks from the stream
-- [ ] Docker compose setup for easy local deployment
-- [ ] Improved error handling and job retries
-- [ ] Separation of worker process from the main FastAPI server
+## 🧠 Concepts I'm Learning / Exploring
+- **FastAPI Lifespans:** Using `@asynccontextmanager` to spin up the background worker when the server starts. (Is this the best way? Still figuring it out).
+- **Redis Streams (Pub/Sub on steroids):**
+  - Using `xreadgroup` and `xack`.
+  - Understanding Consumer Groups so multiple workers don't process the same job twice.
+- **SQLAlchemy Sessions:** Managing DB state (pending -> running -> success).
 
-## Local Setup (WIP)
+## 🚧 What's Broken / Current Blockers
+- *[Add current blocker here, e.g., Worker thread crashes silently]*
+- Need to verify if the Redis consumer group is actually acknowledging messages (`xack`) correctly.
+- The worker is currently just a thread inside the FastAPI app. Eventually, I need to rip it out into its own standalone process.
 
-1. Ensure you have Python 3.12+ and `uv` installed.
-2. Install dependencies:
-   ```bash
-   uv sync
-   ```
-3. Ensure Redis and PostgreSQL are running locally and accessible.
-4. Run the API (which also starts the background worker thread):
-   ```bash
-   uv run uvicorn api.main:app --reload
-   ```
+## 📝 Next Steps / To-Do
+- [ ] Stabilize the Redis consumer logic in `worker.py`.
+- [ ] Add better error handling (what happens if a job fails?).
+- [ ] Figure out Docker Compose so I don't have to manually start Redis and Postgres every time.
+- [ ] Separate the worker from `api/main.py` so they can scale independently.
 
-## Personal Roadmap
-*Currently focusing on stabilizing the Redis consumer group logic and setting up Docker for easier local testing.*
+## 📚 Helpful Links & Resources
+*(Paste good tutorials, docs, or StackOverflow answers here)*
+- [FastAPI Lifespan Docs](https://fastapi.tiangolo.com/advanced/events/)
+- [Redis Streams Intro](https://redis.io/docs/data-types/streams-tutorial/)
+-
+
+---
+**Note to self:** To run this locally right now:
+```bash
+# Make sure redis and postgres are up!
+uv sync
+uv run uvicorn api.main:app --reload
+```
