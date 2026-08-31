@@ -39,4 +39,3 @@ A lightweight, asynchronous task queue system built with FastAPI, Redis, and SQL
 
 ## Personal Roadmap
 *Currently focusing on stabilizing the Redis consumer group logic and setting up Docker for easier local testing.*
->>>>>>> af7ac800a714961c6be0dce4b31a21262649e0d9
