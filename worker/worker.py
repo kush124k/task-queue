@@ -1,5 +1,5 @@
 from api.routes.jobs import r, STREAM_NAME,  GROUP_NAME
-from api.database import engine, Job, Deadjob
+from api.database import engine, Job, DeadJob
 from sqlalchemy.orm import Session
 import time
 import redis
@@ -85,6 +85,9 @@ def workjob():
         try:
             entries = r.xreadgroup(GROUP_NAME, CONSUMER_NAME, {STREAM_NAME : ">"}, count=1, block=5000)
         except redis.exceptions.TimeoutError:
+            continue
+            
+        if not entries:
             continue
 
         stream_name, messages = entries[0]

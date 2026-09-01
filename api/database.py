@@ -2,8 +2,9 @@
 from sqlalchemy import create_engine, String, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 from datetime import datetime
+import os
 
-DATABASE_URL = "postgresql://postgres:example@localhost:5432/postgres"
+DATABASE_URL = os.environ.get ( "DATABASE_URL", "postgresql://postgres:example@localhost:5432/postgres") 
 
 engine = create_engine(DATABASE_URL)
 

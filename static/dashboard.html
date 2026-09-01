@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Queue Dashboard</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #eee; padding: 2rem; }
+        .box { border: 1px solid #444; padding: 1rem; margin: 1rem 0; border-radius: 6px; }
+        h2 { color: #7fdbff; }
+        .stat { font-size: 1.2rem; margin: 0.3rem 0; }
+    </style>
+</head>
+<body>
+    <h1>Task Queue Dashboard</h1>
+
+    <div class="box">
+        <h2>Job Status</h2>
+        <div id="status_counts"></div>
+    </div>
+
+    <div class="box">
+        <h2>Queue Depth</h2>
+        <div id="queue_depth" class="stat"></div>
+        <div id="pending_unacked" class="stat"></div>
+    </div>
+
+    <div class="box">
+        <h2>Per-Worker Throughput</h2>
+        <div id="worker_counts"></div>
+    </div>
+
+    <div class="box">
+        <h2>Dead Letter Count</h2>
+        <div id="dead_count" class="stat"></div>
+    </div>
+
+    <script>
+        const ws = new WebSocket(`ws://${window.location.host}/ws/stats`);
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            document.getElementById("status_counts").innerHTML =
+                Object.entries(data.status_counts).map(([k, v]) => `<div class="stat">${k}: ${v}</div>`).join("");
+
+            document.getElementById("queue_depth").innerText = "Stream length: " + data.queue_depth;
+            document.getElementById("pending_unacked").innerText = "Unacknowledged: " + data.pending_unacked;
+
+            document.getElementById("worker_counts").innerHTML =
+                Object.entries(data.worker_counts).map(([k, v]) => `<div class="stat">${k}: ${v} jobs</div>`).join("");
+
+            document.getElementById("dead_count").innerText = data.dead_letter_count + " jobs";
+        };
+
+        ws.onclose = () => {
+            document.body.innerHTML += "<p style='color:red'>Disconnected from server</p>";
+        };
+    </script>
+</body>
+</html>

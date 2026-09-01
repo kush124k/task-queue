@@ -4,10 +4,11 @@ from sqlalchemy.orm import Session
 import redis
 import uuid
 from datetime import datetime
+import os
 
 jobs_db = {}
 
-r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+r = redis.Redis(host=os.environ.get("REDIS_HOST","localhost"), port=6379, decode_responses=True)
 
 STREAM_NAME = "jobs_stream"
 GROUP_NAME = "workers_group"
