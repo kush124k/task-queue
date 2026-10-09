@@ -13,9 +13,11 @@ r = redis.Redis(host=os.environ.get("REDIS_HOST","localhost"), port=6379, decode
 STREAM_NAME = "jobs_stream"
 GROUP_NAME = "workers_group"
 try:
-    r.xgroup_create("job_stream", "workers_group" , id="0", mkstream=True)
-except redis.exceptions.ResponseError:
-    pass
+    r.xgroup_create(STREAM_NAME, GROUP_NAME , id="0", mkstream=True)
+except redis.exceptions.ResponseError as e:
+    if "BUSYGROUP" not in str(e):
+        raise
+    
 
 
 def rjob(task):

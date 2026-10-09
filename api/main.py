@@ -55,12 +55,13 @@ async def get_job(job_id: str):
 async def reset_all():
     create_table()
     
+    r.xtrim(STREAM_NAME, maxlen=0, approximate=False)
+
     with Session(engine) as session:
         session.query(JobModel).delete()
         session.query(DeadJob).delete()
         session.commit()
 
-    r.delete("job_stream")
 
     return {"message": "all jobs and stream data cleared"}
 
