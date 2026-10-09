@@ -35,6 +35,10 @@ def process_job(job_id, entry_id):
 
         with Session(engine) as session:
             job = session.get(Job, job_id)
+            if job is None:
+                print(f"job {job_id} vanished mid-run - acking and dropping")
+                r.xack(STREAM_NAME, GROUP_NAME, entry_id)
+                return
             job.status = "success"
             session.commit()
 
@@ -43,6 +47,10 @@ def process_job(job_id, entry_id):
     except Exception as e:
         with Session(engine) as session:
             job = session.get(Job, job_id)
+            if job is None:
+                print(f"job {job_id} vanished mid-run - acking and dropping")
+                r.xack(STREAM_NAME, GROUP_NAME, entry_id)
+                return
             job.retries += 1
 
             if(job.retries >= MAX_RETRIES):
